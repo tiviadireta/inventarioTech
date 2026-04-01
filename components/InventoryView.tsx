@@ -67,7 +67,7 @@ export function InventoryView() {
     try {
       const { data: updated, error } = await supabase
         .from('inventory')
-        .update({ status: 'Disponível', user: '', location: 'Estoque' })
+        .update({ status: 'Disponível', user: 'Estoque', location: 'Estoque' })
         .eq('id', item.id)
         .select()
         .single();

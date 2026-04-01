@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { InventoryItem } from '@/types/database';
 import { DataTable } from './DataTable';
-import { Database, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Database, Plus, Pencil, Trash2, ArchiveRestore } from 'lucide-react';
 import { Modal } from './Modal';
 
 export function InventoryView() {
@@ -58,6 +58,24 @@ export function InventoryView() {
       setData(data.filter(d => d.id !== id));
     } catch (err: any) {
       alert('Erro ao excluir: ' + err.message);
+    }
+  };
+
+  const handleReturnToStock = async (item: InventoryItem) => {
+    if (!confirm(`Deseja retornar o equipamento "${item.equipment}" (${item.serial_number}) para o estoque?`)) return;
+    
+    try {
+      const { data: updated, error } = await supabase
+        .from('inventory')
+        .update({ status: 'Disponível', user: '', location: 'Estoque' })
+        .eq('id', item.id)
+        .select()
+        .single();
+        
+      if (error) throw error;
+      setData(data.map(d => d.id === item.id ? updated : d));
+    } catch (err: any) {
+      alert('Erro ao retornar para o estoque: ' + err.message);
     }
   };
 
@@ -170,6 +188,13 @@ export function InventoryView() {
             header: 'AÇÕES', 
             accessor: (item) => (
               <div className="flex gap-3">
+                <button 
+                  onClick={() => handleReturnToStock(item)} 
+                  className="text-emerald-400 hover:text-emerald-300 transition-colors" 
+                  title="Devolver ao Estoque"
+                >
+                  <ArchiveRestore className="w-4 h-4" />
+                </button>
                 <button onClick={() => handleOpenModal(item)} className="text-blue-400 hover:text-blue-300 transition-colors" title="Editar">
                   <Pencil className="w-4 h-4" />
                 </button>

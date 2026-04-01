@@ -4,8 +4,35 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { AccessCredential } from '@/types/database';
 import { DataTable } from './DataTable';
-import { Shield, Plus, Pencil, Trash2 } from 'lucide-react';
+import { Shield, Plus, Pencil, Trash2, Copy, Check } from 'lucide-react';
 import { Modal } from './Modal';
+
+const PasswordCell = ({ password }: { password?: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  if (!password) return <span className="text-zinc-500">-</span>;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(password);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="font-mono bg-zinc-800 px-2 py-1 rounded text-xs text-zinc-400 tracking-widest">
+        ••••••••
+      </span>
+      <button
+        onClick={handleCopy}
+        className="text-zinc-400 hover:text-white transition-colors"
+        title="Copiar senha"
+      >
+        {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+      </button>
+    </div>
+  );
+};
 
 export function AccessCredentialsView() {
   const [data, setData] = useState<AccessCredential[]>([]);
@@ -151,11 +178,7 @@ export function AccessCredentialsView() {
           { header: 'TIPO', accessor: 'type' },
           { 
             header: 'SENHA', 
-            accessor: (item) => (
-              <span className="font-mono bg-zinc-800 px-2 py-1 rounded text-xs select-all text-zinc-300">
-                {item.password || '-'}
-              </span>
-            ) 
+            accessor: (item) => <PasswordCell password={item.password || undefined} />
           },
           { header: 'OBSERVAÇÕES', accessor: 'observations' },
           { 

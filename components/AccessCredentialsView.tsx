@@ -19,14 +19,39 @@ const PasswordCell = ({ password }: { password?: string }) => {
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex items-center gap-2 group">
       <span className="font-mono bg-zinc-800 px-2 py-1 rounded text-xs text-zinc-400 tracking-widest">
         ••••••••
       </span>
       <button
         onClick={handleCopy}
-        className="text-zinc-400 hover:text-white transition-colors"
+        className="text-zinc-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
         title="Copiar senha"
+      >
+        {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+      </button>
+    </div>
+  );
+};
+
+const EmailCell = ({ email }: { email?: string }) => {
+  const [copied, setCopied] = useState(false);
+
+  if (!email) return <span className="text-zinc-500">-</span>;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(email);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  return (
+    <div className="flex items-center gap-2 group">
+      <span className="text-zinc-300">{email}</span>
+      <button
+        onClick={handleCopy}
+        className="text-zinc-500 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
+        title="Copiar email"
       >
         {copied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
       </button>
@@ -174,7 +199,10 @@ export function AccessCredentialsView() {
         }
         columns={[
           { header: activeTab === 'plataforma' ? 'PLATAFORMA' : 'SERVIÇO', accessor: 'platform_name' },
-          { header: 'EMAIL / USUÁRIO', accessor: 'email' },
+          { 
+            header: 'EMAIL / USUÁRIO', 
+            accessor: (item) => <EmailCell email={item.email || undefined} /> 
+          },
           { header: 'TIPO', accessor: 'type' },
           { 
             header: 'SENHA', 

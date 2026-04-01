@@ -16,6 +16,7 @@ export function InventoryView() {
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [formData, setFormData] = useState<Partial<InventoryItem>>({});
   const [saving, setSaving] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
   useEffect(() => {
     fetchData();
@@ -123,32 +124,53 @@ export function InventoryView() {
   const disponivel = data.filter(d => d.status?.toLowerCase() === 'disponível' || d.status?.toLowerCase() === 'disponivel').length;
   const manutencao = data.filter(d => d.status?.toLowerCase() === 'manutenção' || d.status?.toLowerCase() === 'manutencao').length;
 
+  const filteredData = data.filter(item => {
+    if (!statusFilter) return true;
+    const status = item.status?.toLowerCase() || '';
+    if (statusFilter === 'em uso') return status === 'em uso';
+    if (statusFilter === 'disponível') return status === 'disponível' || status === 'disponivel';
+    if (statusFilter === 'manutenção') return status === 'manutenção' || status === 'manutencao';
+    return true;
+  });
+
   return (
     <div className="space-y-8">
       {/* KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#18181b] border border-[#F26824] rounded-xl p-6 flex flex-col justify-center shadow-[0_0_15px_rgba(242,104,36,0.05)]">
+        <button 
+          onClick={() => setStatusFilter(null)}
+          className={`bg-[#18181b] border ${statusFilter === null ? 'border-[#F26824] ring-1 ring-[#F26824]' : 'border-zinc-800'} rounded-xl p-6 flex flex-col justify-center text-left transition-all hover:border-[#F26824]/50`}
+        >
           <span className="text-zinc-500 text-xs font-bold tracking-wider uppercase mb-2">Total de Ativos</span>
           <span className="text-4xl font-bold text-white">{total}</span>
-        </div>
-        <div className="bg-[#18181b] border border-green-500/30 rounded-xl p-6 flex flex-col justify-center">
+        </button>
+        <button 
+          onClick={() => setStatusFilter('em uso')}
+          className={`bg-[#18181b] border ${statusFilter === 'em uso' ? 'border-green-500 ring-1 ring-green-500' : 'border-green-500/30'} rounded-xl p-6 flex flex-col justify-center text-left transition-all hover:border-green-500/60`}
+        >
           <span className="text-zinc-500 text-xs font-bold tracking-wider uppercase mb-2">Em Operação</span>
           <span className="text-4xl font-bold text-green-500">{emOperacao}</span>
-        </div>
-        <div className="bg-[#18181b] border border-blue-500/30 rounded-xl p-6 flex flex-col justify-center">
+        </button>
+        <button 
+          onClick={() => setStatusFilter('disponível')}
+          className={`bg-[#18181b] border ${statusFilter === 'disponível' ? 'border-blue-500 ring-1 ring-blue-500' : 'border-blue-500/30'} rounded-xl p-6 flex flex-col justify-center text-left transition-all hover:border-blue-500/60`}
+        >
           <span className="text-zinc-500 text-xs font-bold tracking-wider uppercase mb-2">Disponível</span>
           <span className="text-4xl font-bold text-blue-500">{disponivel}</span>
-        </div>
-        <div className="bg-[#18181b] border border-[#F26824]/30 rounded-xl p-6 flex flex-col justify-center">
+        </button>
+        <button 
+          onClick={() => setStatusFilter('manutenção')}
+          className={`bg-[#18181b] border ${statusFilter === 'manutenção' ? 'border-[#F26824] ring-1 ring-[#F26824]' : 'border-[#F26824]/30'} rounded-xl p-6 flex flex-col justify-center text-left transition-all hover:border-[#F26824]/60`}
+        >
           <span className="text-zinc-500 text-xs font-bold tracking-wider uppercase mb-2">Manutenção</span>
           <span className="text-4xl font-bold text-[#F26824]">{manutencao}</span>
-        </div>
+        </button>
       </div>
       
       <DataTable
-        title="Base de Equipamentos"
+        title={statusFilter ? `Base de Equipamentos (${statusFilter.toUpperCase()})` : "Base de Equipamentos"}
         icon={<Database className="w-5 h-5" />}
-        data={data}
+        data={filteredData}
         loading={loading}
         searchPlaceholder="Buscar por serial, nome, status, local..."
         searchKeys={['equipment', 'brand_model', 'serial_number', 'user', 'location', 'status']}

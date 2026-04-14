@@ -87,9 +87,13 @@ export function MobileDevicesView() {
         if (error) throw error;
         setData(data.map(d => d.id === editingItem.id ? updated : d));
       } else {
+        const payload = { ...formData };
+        if (!payload.id) {
+          payload.id = crypto.randomUUID();
+        }
         const { data: inserted, error } = await supabase
           .from('mobile_devices')
-          .insert([formData])
+          .insert([payload])
           .select()
           .single();
         if (error) throw error;

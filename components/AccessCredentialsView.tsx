@@ -129,9 +129,13 @@ export function AccessCredentialsView() {
         if (error) throw error;
         setData(data.map(d => d.id === editingItem.id ? updated : d));
       } else {
+        const payload = { ...formData };
+        if (!payload.id) {
+          payload.id = crypto.randomUUID();
+        }
         const { data: inserted, error } = await supabase
           .from('access_credentials')
-          .insert([formData])
+          .insert([payload])
           .select()
           .single();
         if (error) throw error;

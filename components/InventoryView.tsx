@@ -6,6 +6,7 @@ import { InventoryItem } from '@/types/database';
 import { DataTable } from './DataTable';
 import { Database, Plus, Pencil, Trash2, ArchiveRestore } from 'lucide-react';
 import { Modal } from './Modal';
+import { generateId } from '@/lib/utils';
 
 export function InventoryView() {
   const [data, setData] = useState<InventoryItem[]>([]);
@@ -96,7 +97,7 @@ export function InventoryView() {
       } else {
         const payload = { ...formData };
         if (!payload.id) {
-          payload.id = crypto.randomUUID();
+          payload.id = generateId();
         }
         const { data: inserted, error } = await supabase
           .from('inventory')

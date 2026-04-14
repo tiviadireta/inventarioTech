@@ -6,6 +6,7 @@ import { MobileDevice } from '@/types/database';
 import { DataTable } from './DataTable';
 import { Smartphone, Plus, Pencil, Trash2 } from 'lucide-react';
 import { Modal } from './Modal';
+import { generateId } from '@/lib/utils';
 
 export function MobileDevicesView() {
   const [data, setData] = useState<MobileDevice[]>([]);
@@ -89,7 +90,7 @@ export function MobileDevicesView() {
       } else {
         const payload = { ...formData };
         if (!payload.id) {
-          payload.id = crypto.randomUUID();
+          payload.id = generateId();
         }
         const { data: inserted, error } = await supabase
           .from('mobile_devices')

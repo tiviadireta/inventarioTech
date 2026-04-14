@@ -6,6 +6,7 @@ import { AccessCredential } from '@/types/database';
 import { DataTable } from './DataTable';
 import { Shield, Plus, Pencil, Trash2, Copy, Check } from 'lucide-react';
 import { Modal } from './Modal';
+import { generateId } from '@/lib/utils';
 
 const PasswordCell = ({ password }: { password?: string }) => {
   const [copied, setCopied] = useState(false);
@@ -131,7 +132,7 @@ export function AccessCredentialsView() {
       } else {
         const payload = { ...formData };
         if (!payload.id) {
-          payload.id = crypto.randomUUID();
+          payload.id = generateId();
         }
         const { data: inserted, error } = await supabase
           .from('access_credentials')

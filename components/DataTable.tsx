@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { GripVertical } from 'lucide-react';
 
 interface Column<T> {
   header: string;
@@ -157,7 +158,7 @@ export function DataTable<T>({ title, tableId, icon, data, columns, searchPlaceh
                   title="Arraste para reordenar coluna"
                 >
                   <div className="flex items-center gap-2">
-                    <span className="text-zinc-600">⋮⋮</span>
+                    <GripVertical className="w-4 h-4 text-zinc-600" />
                     {col.header}
                   </div>
                 </th>
@@ -195,7 +196,7 @@ export function DataTable<T>({ title, tableId, icon, data, columns, searchPlaceh
                     <td key={colIndex} className="px-6 py-4 whitespace-nowrap text-sm text-zinc-300">
                       {colIndex === 0 && isRowReorderable ? (
                         <div className="flex items-center gap-3">
-                          <span className="text-zinc-600 cursor-move">⋮⋮</span>
+                          <GripVertical className="w-4 h-4 text-zinc-600 cursor-move" />
                           {typeof col.accessor === 'function'
                             ? col.accessor(item)
                             : (item[col.accessor] as React.ReactNode) || '-'}

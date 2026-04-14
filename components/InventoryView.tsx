@@ -169,6 +169,7 @@ export function InventoryView() {
       
       <DataTable
         title={statusFilter ? `Base de Equipamentos (${statusFilter.toUpperCase()})` : "Base de Equipamentos"}
+        tableId="inventory"
         icon={<Database className="w-5 h-5" />}
         data={filteredData}
         loading={loading}

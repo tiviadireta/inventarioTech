@@ -39,4 +39,5 @@ export interface MobileDevice {
   period: string | null;
   date: string | null;
   type: string | null;
+  sort_order?: number | null;
 }

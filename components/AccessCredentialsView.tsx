@@ -184,6 +184,7 @@ export function AccessCredentialsView() {
 
       <DataTable
         title={activeTab === 'plataforma' ? 'Base de Plataformas' : 'Base de Outlook'}
+        tableId={`access-credentials-${activeTab}`}
         icon={<Shield className="w-5 h-5" />}
         data={filteredData}
         loading={loading}

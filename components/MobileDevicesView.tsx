@@ -24,10 +24,22 @@ export function MobileDevicesView() {
   async function fetchData() {
     try {
       setLoading(true);
-      const { data, error } = await supabase
+      // Try fetching with sort_order first
+      let { data, error } = await supabase
         .from('mobile_devices')
         .select('*')
+        .order('sort_order', { ascending: true, nullsFirst: false })
         .order('created_at', { ascending: false });
+
+      // If it fails because sort_order doesn't exist, fallback to created_at
+      if (error && error.message.includes('sort_order')) {
+        const fallback = await supabase
+          .from('mobile_devices')
+          .select('*')
+          .order('created_at', { ascending: false });
+        data = fallback.data;
+        error = fallback.error;
+      }
 
       if (error) throw error;
       setData(data || []);
@@ -91,6 +103,30 @@ export function MobileDevicesView() {
     }
   };
 
+  const handleRowReorder = async (dragIndex: number, dropIndex: number) => {
+    const newData = [...data];
+    const [draggedItem] = newData.splice(dragIndex, 1);
+    newData.splice(dropIndex, 0, draggedItem);
+    
+    // Update local state immediately for snappy UI
+    setData(newData);
+
+    try {
+      // Update sort_order for all items in the database
+      await Promise.all(
+        newData.map((item, index) => 
+          supabase
+            .from('mobile_devices')
+            .update({ sort_order: index })
+            .eq('id', item.id)
+        )
+      );
+    } catch (err: any) {
+      console.error('Error saving order:', err);
+      alert('Erro ao salvar a nova ordem: ' + err.message);
+    }
+  };
+
   if (error) {
     return (
       <div className="p-4 bg-red-900/20 border border-red-900/50 rounded-xl text-red-400">
@@ -104,9 +140,11 @@ export function MobileDevicesView() {
     <div className="space-y-8">
       <DataTable
         title="Base de Celulares"
+        tableId="mobile-devices"
         icon={<Smartphone className="w-5 h-5" />}
         data={data}
         loading={loading}
+        onRowReorder={handleRowReorder}
         searchPlaceholder="Buscar por número, responsável, setor..."
         searchKeys={['number', 'operator', 'sector_user', 'responsible', 'cpf_name', 'type']}
         headerActions={
@@ -118,11 +156,11 @@ export function MobileDevicesView() {
           </button>
         }
         columns={[
-          { header: 'NÚMERO', accessor: 'number' },
-          { header: 'OPERADORA', accessor: 'operator' },
-          { header: 'SETOR / USUÁRIO', accessor: 'sector_user' },
           { header: 'RESPONSÁVEL', accessor: 'responsible' },
+          { header: 'SETOR / USUÁRIO', accessor: 'sector_user' },
+          { header: 'NÚMERO', accessor: 'number' },
           { header: 'APARELHO / CHIP', accessor: 'chip_device' },
+          { header: 'OPERADORA', accessor: 'operator' },
           { header: 'TIPO', accessor: 'type' },
           { 
             header: 'AÇÕES', 

@@ -214,7 +214,17 @@ export function AccessCredentialsView() {
             header: 'SENHA', 
             accessor: (item) => <PasswordCell password={item.password || undefined} />
           },
-          { header: 'OBSERVAÇÕES', accessor: 'observations' },
+          { 
+            header: 'OBSERVAÇÕES', 
+            accessor: (item) => (
+              <div 
+                className="max-w-[200px] lg:max-w-[300px] truncate" 
+                title={item.observations || ''}
+              >
+                {item.observations || '-'}
+              </div>
+            )
+          },
           { 
             header: 'AÇÕES', 
             accessor: (item) => (

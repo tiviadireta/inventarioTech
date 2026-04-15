@@ -109,6 +109,7 @@ export function MobileDevicesView() {
   };
 
   const handleRowReorder = async (dragIndex: number, dropIndex: number) => {
+    const originalData = [...data];
     const newData = [...data];
     const [draggedItem] = newData.splice(dragIndex, 1);
     newData.splice(dropIndex, 0, draggedItem);
@@ -118,17 +119,28 @@ export function MobileDevicesView() {
 
     try {
       // Update sort_order for all items in the database
-      await Promise.all(
-        newData.map((item, index) => 
-          supabase
-            .from('mobile_devices')
-            .update({ sort_order: index })
-            .eq('id', item.id)
-        )
+      const promises = newData.map((item, index) => 
+        supabase
+          .from('mobile_devices')
+          .update({ sort_order: index })
+          .eq('id', item.id)
       );
+      
+      const results = await Promise.all(promises);
+      const firstError = results.find(r => r.error)?.error;
+      
+      if (firstError) {
+        throw firstError;
+      }
     } catch (err: any) {
       console.error('Error saving order:', err);
-      alert('Erro ao salvar a nova ordem: ' + err.message);
+      setData(originalData); // Revert UI on error
+      
+      if (err.message?.includes('sort_order')) {
+        alert('Para salvar a ordem, você precisa criar a coluna no banco de dados!\n\nVá no SQL Editor do Supabase e rode:\nALTER TABLE mobile_devices ADD COLUMN sort_order INTEGER;');
+      } else {
+        alert('Erro ao salvar a nova ordem: ' + err.message);
+      }
     }
   };
 
@@ -150,6 +162,7 @@ export function MobileDevicesView() {
         data={data}
         loading={loading}
         onRowReorder={handleRowReorder}
+        disablePagination={true}
         searchPlaceholder="Buscar por número, responsável, setor..."
         searchKeys={['number', 'operator', 'sector_user', 'responsible', 'cpf_name', 'type']}
         headerActions={
@@ -161,10 +174,31 @@ export function MobileDevicesView() {
           </button>
         }
         columns={[
-          { header: 'RESPONSÁVEL', accessor: 'responsible' },
-          { header: 'SETOR / USUÁRIO', accessor: 'sector_user' },
+          { 
+            header: 'RESPONSÁVEL', 
+            accessor: (item) => (
+              <div className="max-w-[150px] truncate" title={item.responsible || ''}>
+                {item.responsible || '-'}
+              </div>
+            )
+          },
+          { 
+            header: 'SETOR / USUÁRIO', 
+            accessor: (item) => (
+              <div className="max-w-[200px] truncate" title={item.sector_user || ''}>
+                {item.sector_user || '-'}
+              </div>
+            )
+          },
           { header: 'NÚMERO', accessor: 'number' },
-          { header: 'APARELHO / CHIP', accessor: 'chip_device' },
+          { 
+            header: 'APARELHO / CHIP', 
+            accessor: (item) => (
+              <div className="max-w-[200px] truncate" title={item.chip_device || ''}>
+                {item.chip_device || '-'}
+              </div>
+            )
+          },
           { header: 'OPERADORA', accessor: 'operator' },
           { header: 'TIPO', accessor: 'type' },
           { 

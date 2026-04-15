@@ -17,9 +17,10 @@ interface DataTableProps<T> {
   loading?: boolean;
   headerActions?: React.ReactNode;
   onRowReorder?: (dragIndex: number, dropIndex: number) => void;
+  disablePagination?: boolean;
 }
 
-export function DataTable<T>({ title, tableId, icon, data, columns, searchPlaceholder = 'Buscar...', searchKeys, loading, headerActions, onRowReorder }: DataTableProps<T>) {
+export function DataTable<T>({ title, tableId, icon, data, columns, searchPlaceholder = 'Buscar...', searchKeys, loading, headerActions, onRowReorder, disablePagination }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -93,8 +94,8 @@ export function DataTable<T>({ title, tableId, icon, data, columns, searchPlaceh
     if (dragIndex === dropIndex || isNaN(dragIndex)) return;
     
     if (onRowReorder) {
-      const globalDragIndex = (currentPage - 1) * itemsPerPage + dragIndex;
-      const globalDropIndex = (currentPage - 1) * itemsPerPage + dropIndex;
+      const globalDragIndex = disablePagination ? dragIndex : (currentPage - 1) * itemsPerPage + dragIndex;
+      const globalDropIndex = disablePagination ? dropIndex : (currentPage - 1) * itemsPerPage + dropIndex;
       onRowReorder(globalDragIndex, globalDropIndex);
     }
   };
@@ -111,7 +112,7 @@ export function DataTable<T>({ title, tableId, icon, data, columns, searchPlaceh
   });
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-  const paginatedData = filteredData.slice(
+  const paginatedData = disablePagination ? filteredData : filteredData.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
@@ -216,27 +217,29 @@ export function DataTable<T>({ title, tableId, icon, data, columns, searchPlaceh
       </div>
 
       {/* Pagination */}
-      <div className="px-6 py-4 border-t border-zinc-800 flex items-center justify-between">
-        <div className="text-sm text-zinc-500">
-          Página {currentPage} de {Math.max(1, totalPages)}
+      {!disablePagination && (
+        <div className="px-6 py-4 border-t border-zinc-800 flex items-center justify-between">
+          <div className="text-sm text-zinc-500">
+            Página {currentPage} de {Math.max(1, totalPages)}
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="px-4 py-2 text-sm font-medium text-zinc-400 bg-transparent border border-zinc-800 rounded-md hover:bg-zinc-800 hover:text-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Anterior
+            </button>
+            <button
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages || totalPages === 0}
+              className="px-4 py-2 text-sm font-medium text-zinc-400 bg-transparent border border-zinc-800 rounded-md hover:bg-zinc-800 hover:text-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              Próximo
+            </button>
+          </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-            disabled={currentPage === 1}
-            className="px-4 py-2 text-sm font-medium text-zinc-400 bg-transparent border border-zinc-800 rounded-md hover:bg-zinc-800 hover:text-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Anterior
-          </button>
-          <button
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            disabled={currentPage === totalPages || totalPages === 0}
-            className="px-4 py-2 text-sm font-medium text-zinc-400 bg-transparent border border-zinc-800 rounded-md hover:bg-zinc-800 hover:text-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            Próximo
-          </button>
-        </div>
-      </div>
+      )}
     </div>
   );
 }

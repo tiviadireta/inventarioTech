@@ -189,10 +189,38 @@ export function InventoryView() {
           </button>
         }
         columns={[
-          { header: 'EQUIPAMENTO', accessor: 'equipment' },
-          { header: 'MARCA / MODELO', accessor: 'brand_model' },
-          { header: 'SÉRIE (ID)', accessor: 'serial_number' },
-          { header: 'RESPONSÁVEL', accessor: (item) => item.user || '-' },
+          { 
+            header: 'EQUIPAMENTO', 
+            accessor: (item) => (
+              <div className="max-w-[150px] truncate" title={item.equipment || ''}>
+                {item.equipment || '-'}
+              </div>
+            )
+          },
+          { 
+            header: 'MARCA / MODELO', 
+            accessor: (item) => (
+              <div className="max-w-[150px] truncate" title={item.brand_model || ''}>
+                {item.brand_model || '-'}
+              </div>
+            )
+          },
+          { 
+            header: 'SÉRIE (ID)', 
+            accessor: (item) => (
+              <div className="max-w-[150px] truncate" title={item.serial_number || ''}>
+                {item.serial_number || '-'}
+              </div>
+            )
+          },
+          { 
+            header: 'RESPONSÁVEL', 
+            accessor: (item) => (
+              <div className="max-w-[150px] truncate" title={item.user || ''}>
+                {item.user || '-'}
+              </div>
+            )
+          },
           { 
             header: 'LOCAL / STATUS', 
             accessor: (item) => (
